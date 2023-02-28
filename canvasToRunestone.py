@@ -7,12 +7,12 @@ with open(gradebook, "r") as file:
   for _ in range(0, 3): 
     next(file)
 
-  for lines in csv.reader(file): 
-        firstName = lines[0].split(", ")[1]
-        lastName = lines[0].split(", ")[0]
-        username = lines[2]
-        email = lines[2] + "@mines.edu"
-        cwid = lines[3]
+  for line in csv.reader(file):
+    firstName = line[0].split(", ")[1]
+    lastName = line[0].split(", ")[0]
+    username = line[2]
+    email = line[2] + "@mines.edu"
+    cwid = line[3]
 
 with open("RunestoneStudents.csv", 'w') as file:
     # Runestone format: username,email,first_name,last_name,password,course
