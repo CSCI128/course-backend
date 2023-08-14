@@ -16,8 +16,8 @@ if os.path.exists('RunestoneStudents-master.csv'):
     print(students[i])
 
 with open(gradebook, "r") as gradebook: 
-  # Ignore first three lines (gradebook stuff)
-  for _ in range(0, 3): 
+  # Ignore first two lines (irrelevant gradebook stuff)
+  for _ in range(0, 2): 
     next(gradebook)
 
   # open (or create) master students file
@@ -27,9 +27,9 @@ with open(gradebook, "r") as gradebook:
     for line in csv.reader(gradebook):
       firstName = line[0].split(", ")[1]
       lastName = line[0].split(", ")[0]
-      username = line[3]
-      email = line[3] + "@mines.edu"
       cwid = line[2]
+      username = "mines_" + cwid
+      email = line[3] + "@mines.edu"
 
       if not (firstName == 'Test' and lastName == 'Student'):      
         # Runestone format: username,email,first_name,last_name,password,course
