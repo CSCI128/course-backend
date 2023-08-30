@@ -65,7 +65,7 @@ for student, grade in students.items():
 
     # catch any other invalid student usernames
     try:
-        gradebookDF.loc[gradebookDF['SIS User ID'] == int(str(student).split("_")[-1].replace(")", "")), 'Week 2 Readings'] = rounded_score
+        gradebookDF.loc[gradebookDF['SIS User ID'] == int(str(student).split("_")[-1].replace(")", "")), 'Week 2 Readings (345279)'] = rounded_score
     except ValueError:
         print(f"{columnName} has an invalid Runestone username, skipping..")
         continue
