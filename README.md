@@ -19,6 +19,8 @@ Run the Python script using `python gradeRunestone.py`
 
 Enter the full file name and path for the Canvas gradebook, e.g.: `Gradebook.csv`
 
+Delete all the assignment columns that aren't the one being graded.
+
 Enter the full file name and path for the Runestone chapter activity gradebook, e.g.: `Runestone.csv`
 
 The resultant file to upload to Canvas will be `Grades-CSCI128_-_Fall_2023_-_All Sections.csv`, located in the same directory your Python script is in.

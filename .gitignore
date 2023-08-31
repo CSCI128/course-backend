@@ -1,2 +1,4 @@
 *.csv
 error.log
+.venv
+.DS_Store

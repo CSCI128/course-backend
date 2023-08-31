@@ -10,7 +10,7 @@ import pandas as pd
 if __name__ == "__main__":
     # Load Canvas & Runestone gradebooks into DataFrames
     gradebook = input("Enter Canvas gradebook filename: ")
-    gradebookDF = pd.read_csv(gradebook)
+    gradebookDF = pd.read_csv(gradebook, dtype={'ID': str})
     gradebookDF = gradebookDF.drop([0]) # drop possible pts row
     
     # TODO unsure if this is necessary
