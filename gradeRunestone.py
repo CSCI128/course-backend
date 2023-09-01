@@ -12,20 +12,29 @@ if __name__ == "__main__":
     gradebook = input("Enter Canvas gradebook filename: ")
     gradebookDF = pd.read_csv(gradebook, dtype={'ID': str})
     gradebookDF = gradebookDF.drop([0]) # drop possible pts row
-    
-    # TODO unsure if this is necessary
-    # gradebookDF['Week 2 Readings (345279)'] = gradebookDF['Week 2 Readings (345279)'].astype(float)
-    
     gradebookDF = gradebookDF[gradebookDF['SIS User ID'] != 'transcriber1']
 
     runestone = input("Enter Runestone gradebook filename: ")
     runestoneDF = pd.read_csv(runestone)
     runestoneDF = runestoneDF.drop(runestoneDF.columns[0], axis=1)
 
-    # TODO read in name of assignment and compare with gradebook AND assignments.json
-    # also check if assignment column exists in gradebook
-    # assignment = input("Enter the name of the assignment you are grading: ")
-    # **dropdown: select from prebuilt assignments
+    assignment_sections = []
+    assignment_name = None
+    print("Loaded assignments:")
+    with open('assignments.json', 'r') as assignments:
+        assignment_data = json.load(assignments)
+        for key in assignment_data.keys():
+            print(key)
+
+        assignment = input("Enter assignment to grade: ")
+        try:
+            for key in assignment_data.keys():
+                if key in assignment:
+                    assignment_sections = assignment_data[assignment]
+                    assignment_name = assignment
+        except KeyError:
+            print("Could not find the specified assignment!")
+            exit()
 
     # storing points for each activity as { row_index: [chapter_id, points] }
     activity_points: dict = {}
@@ -34,17 +43,10 @@ if __name__ == "__main__":
         points: float = float(str(columnData).split(" ")[-1].replace(')', '').replace('(', ''))
         activity_points.update({ chapter_id: [int(columnName), points] })
 
-    # TODO make this taken in via the terminal or something
-    # week 2, 3.1-3.10, 4.1-4.13
-    ASSIGNMENT = [
-        '3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7', '3.8', '3.9', '3.10',
-        '4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8', '4.9', '4.10', '4.11', '4.12', '4.13'
-    ]
-
     # Find maximum points
     points_maximum = 0
     for k, v in activity_points.items():
-        if str(k) in ASSIGNMENT:
+        if str(k) in assignment_sections:
             points_maximum += v[1]
 
     # formatted { studentName: score }
@@ -56,13 +58,24 @@ if __name__ == "__main__":
             points = 0
             for k, v in activity_points.items():
                 for i in range(0, len(columnData.values)):
-                    if i == v[0] and str(k) in ASSIGNMENT and columnData.values[i] != ' ':
+                    if i == v[0] and str(k) in assignment_sections and columnData.values[i] != ' ':
                         points += float(columnData.values[i])
 
             score = (points / points_maximum) * 100
             students.update({ str(columnName).replace('<br>', ' '): score })
 
-    file = open('output.csv', 'w') # TODO I'll remove this later, it's good for testing though
+    # update assignment name once found
+    found_assignment = False
+    for key in gradebookDF.keys():
+        if assignment_name in key:
+            assignment_name = key
+            found_assignment = True
+
+    if not found_assignment:
+        print(f"Could not find assignment '{assignment_name}' in the Canvas gradebook! Make sure you published the assignment and downloaded the latest gradebook.")
+        exit()
+
+    file = open('output.csv', 'w')
     log = open('error.log', 'w')
     for student, grade in students.items():
         rounded_score = math.ceil(grade / 12.5) * 0.125 * 4
@@ -77,14 +90,13 @@ if __name__ == "__main__":
         try:
             student_id = int(str(student).split("_")[-1].replace(")", ""))
             condition = pd.to_numeric(gradebookDF['SIS User ID']) == int(student_id)
-            gradebookDF.loc[condition, 'Week 2 Readings (345279)'] = rounded_score
+            gradebookDF.loc[condition, assignment_name] = rounded_score
         except ValueError:
             log.write(f"{student} has an invalid Runestone username, skipping..\n")
             continue
 
-    # filter out NaNs
     gradebookDF = gradebookDF.fillna(0)
-
+    gradebookDF.to_csv('Grades-CSCI128_-_Fall_2023_-_All Sections.csv', index=False)
+    
     file.close()
     log.close()
-    gradebookDF.to_csv('Grades-CSCI128_-_Fall_2023_-_All Sections.csv', index=False)
