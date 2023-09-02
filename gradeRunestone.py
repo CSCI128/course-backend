@@ -75,7 +75,7 @@ if __name__ == "__main__":
         print(f"Could not find assignment '{assignment_name}' in the Canvas gradebook! Make sure you published the assignment and downloaded the latest gradebook.")
         exit()
 
-    file = open('output.csv', 'w')
+    file = open(f'{assignment_name}.csv', 'w')
     log = open('error.log', 'w')
     for student, grade in students.items():
         rounded_score = math.ceil(grade / 12.5) * 0.125 * 4
