@@ -132,32 +132,33 @@ if __name__ == "__main__":
         max_points = int(input("Enter max score for this assignment: "))
 
         log = open('error.log', 'w')
-
-        # formatted { studentcwid: score% }
+        
+        # find student by name and their best score (since there's no way to check for good emails)
+        # also solves the issue of people doing it on the wrong account
+        # formatted { first_last: score%}
         students: dict = {}
         for _, row in runestoneDF.iterrows():
-            try:
-                student_name = row['email'].split('@')[0]
-                if len(student_name.split('m')) > 1:
-                    points = row[assignment_name]
-                    if math.isnan(row[assignment_name]):
-                        points = 0
+            points = row[assignment_name]
+            if math.isnan(row[assignment_name]):
+                points = 0
 
-                    students.update({ int(student_name.split('m')[1]) : (points / max_points) * 100 })
-                else:
-                    log.write(f"{student_name} has an invalid Runestone username, skipping..\n")
-            except ValueError:
-                log.write(f"{student_name} has an invalid Runestone username, skipping..\n")
+            student_name = row['last_name'] + ', ' + row['first_name']
+            if student_name in students:
+                if points < students[student_name]:
+                    log.write(f"{student_name} had another account with a lower score, not updating..\n")
+                    continue
+
+            students.update({ student_name : (points / max_points) * 100 })
 
         # grade students
         file = open(f'{assignment_name}.csv', 'w')
-        for cwid, grade in students.items():
+        for student, grade in students.items():
             rounded_score = math.ceil(grade / 12.5) * 0.125 * 4
 
             # Rounded score: round to the nearest multiple of 12.5%
-            file.write(f'{cwid},{rounded_score}\n')
+            file.write(f'{student},{rounded_score}\n')
 
-            condition = pd.to_numeric(gradebookDF['SIS User ID']) == int(cwid)
+            condition = gradebookDF['Student'] == student
             gradebookDF.loc[condition, assignment_name] = rounded_score
 
         gradebookDF = gradebookDF.fillna(0)
