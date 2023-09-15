@@ -128,17 +128,6 @@ if __name__ == "__main__":
                 print("Could not find the specified assignment!")
                 exit()
 
-        # update assignment name once found
-        found_assignment = False
-        for key in gradebookDF.keys():
-            if assignment_name in key:
-                assignment_name = key
-                found_assignment = True
-
-        if not found_assignment:
-            print(f"Could not find assignment '{assignment_name}' in the Canvas gradebook! Make sure you published the assignment and downloaded the latest gradebook.")
-            exit()
-
         # TODO add max assignment pts to "loaded assignments"? or enter (to calculate percentage)
         max_points = int(input("Enter max score for this assignment: "))
 
@@ -160,6 +149,17 @@ if __name__ == "__main__":
                     continue
 
             students.update({ student_name : (points / max_points) * 100 })
+
+        # update assignment name for the canvas CSV export
+        found_assignment = False
+        for key in gradebookDF.keys():
+            if assignment_name in key:
+                assignment_name = key
+                found_assignment = True
+
+        if not found_assignment:
+            print(f"Could not find assignment '{assignment_name}' in the Canvas gradebook! Make sure you published the assignment and downloaded the latest gradebook.")
+            exit()
 
         # grade students
         file = open(f'{assignment_name}.csv', 'w')
