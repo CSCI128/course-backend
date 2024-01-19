@@ -68,11 +68,16 @@ async def main() -> None:
     for student, grade in students.items():
         rounded_score = math.ceil(grade / 12.5) * 0.125 * 4
 
-        # Rounded score: round to the nearest multiple of 12.5%
-        file.write(f'{student},{rounded_score}\n')
+        try:
+            # Rounded score: round to the nearest multiple of 12.5%
+            file.write(f'{student},{rounded_score}\n')
 
-        condition = gradebookDF['SIS Login ID'] == await azure.getCWIDFromEmail(student)
-        gradebookDF.loc[condition, assignment_name] = rounded_score
+            condition = gradebookDF['SIS Login ID'] == await azure.getCWIDFromEmail(student)
+            gradebookDF.loc[condition, assignment_name] = rounded_score
+        except:
+            # if anything goes wrong or student isn't found, move onto the next
+            print(f'Could not find Azure CWID for {student}..')
+            continue
 
     gradebookDF = gradebookDF.fillna(0)
     gradebookDF.to_csv('Grades-CSCI128_-_Spring_2024_-_All Sections.csv', index=False)
