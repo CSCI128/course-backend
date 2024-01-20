@@ -6,10 +6,7 @@ import math
 import pandas as pd
 from AzureAD import AzureAD
 from dotenv import load_dotenv
-
 load_dotenv() 
-
-# strongly type stuff
 
 azure = AzureAD(os.getenv("TENANT_ID"))
 
@@ -28,11 +25,9 @@ async def main() -> None:
     runestoneDF = runestoneDF.drop([0]) # drop empty row
 
     assignment_name = None
-    print("Loaded assignments:")
     with open('assignments.json', 'r') as assignments:
         assignment_data: dict = json.load(assignments)
-        for key in assignment_data.keys():
-            print(key)
+        print("Loaded assignments:", ", ".join(assignment_data.keys()))
 
         assignment = input("Enter assignment to grade: ")
         try:
@@ -66,24 +61,32 @@ async def main() -> None:
     # grade students
     file = open(f'{assignment_name}.csv', 'w')
     for student, grade in students.items():
+        if not str(student).endswith("@mines.edu"):
+            continue
+
+        # if count == 5:
+        #     break
+        # count += 1
         rounded_score = math.ceil(grade / 12.5) * 0.125 * 4
 
-        try:
-            # Rounded score: round to the nearest multiple of 12.5%
-            file.write(f'{student},{rounded_score}\n')
+        # try:
 
-            condition = gradebookDF['SIS Login ID'] == await azure.getCWIDFromEmail(student)
-            gradebookDF.loc[condition, assignment_name] = rounded_score
-        except:
-            # if anything goes wrong or student isn't found, move onto the next
-            print(f'Could not find Azure CWID for {student}..')
-            continue
+        # Rounded score: round to the nearest multiple of 12.5%
+        file.write(f'{student},{rounded_score}\n')
+
+        cwid = await azure.getCWIDFromEmail(student)
+        condition = gradebookDF['SIS User ID'] == cwid
+        gradebookDF.loc[condition, assignment_name] = rounded_score
+
+        # except:
+        #     # if anything goes wrong or student isn't found, move onto the next
+        #     print(f'Could not find Azure CWID for {student}..')
+        #     continue
 
     gradebookDF = gradebookDF.fillna(0)
     gradebookDF.to_csv('Grades-CSCI128_-_Spring_2024_-_All Sections.csv', index=False)
-    
+
     file.close()
 
 if __name__ == "__main__":
-    # Run the event loop
     asyncio.run(main())
