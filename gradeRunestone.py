@@ -3,6 +3,7 @@ import os
 import asyncio
 import json
 import math
+import shelve
 import pandas as pd
 from AzureAD import AzureAD
 from dotenv import load_dotenv
@@ -60,18 +61,24 @@ async def main() -> None:
 
     # grade students
     file = open(f'{assignment_name}.csv', 'w')
-    for student, grade in students.items():
-        if not str(student).endswith("@mines.edu"):
-            continue
+    with shelve.open('cwids.db') as cache:
+        for student, grade in students.items():
+            if not str(student).endswith("@mines.edu"):
+                continue
 
-        # Rounded score: round to the nearest multiple of 12.5%
-        rounded_score = math.ceil(grade / 12.5) * 0.125 * 4
+            # Rounded score: round to the nearest multiple of 12.5%
+            rounded_score = math.ceil(grade / 12.5) * 0.125 * 4
 
-        file.write(f'{student},{rounded_score}\n')
+            file.write(f'{student},{rounded_score}\n')
 
-        cwid = await azure.getCWIDFromEmail(student)
-        condition = gradebookDF['SIS User ID'] == cwid
-        gradebookDF.loc[condition, assignment_name] = rounded_score
+            if student in cache.keys():
+                cwid = cache[student]
+            else:
+                cwid = await azure.getCWIDFromEmail(student)
+                cache[student] = cwid
+
+            condition = gradebookDF['SIS User ID'] == cwid
+            gradebookDF.loc[condition, assignment_name] = rounded_score
 
     gradebookDF = gradebookDF.fillna(0)
     gradebookDF.to_csv('Grades-CSCI128_-_Spring_2024_-_All Sections.csv', index=False)
