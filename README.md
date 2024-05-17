@@ -18,11 +18,10 @@ neither Canvas nor Runestone gradebooks actually store student emails; Canvas's 
 Create a file called `.env` in the `course-backend` folder. Inside, write: `TENANT_ID=""`
 
 Ask Ethan/Greg for details on how to get the `TENANT_ID`. Note that when the script runs for the first time,
-it will take a long time because it needs to query Mines Azure services for every single student. 
-
-Following the first run, a file called `cwids.db` will be generated; this is a cache of student CWIDs -> emails. Leave this file alone; it will help the script run quicker. These files are gitignored, but ensure that you *never* commit a `cwids.db` or gradebook csv for legal reasons.
+it will take a long time because it needs to query Mines Azure services for every single student. See notes below for details.
 
 Next, create and activate a venv, then run the script:
+
 `python3 -m venv venv`
 
 `pip install -r requirements.txt`
@@ -45,9 +44,11 @@ For verification/testing purposes, students are outputted in a simpler format in
 
 ## Grading Script Notes
 
-We curve grades just a little! We round to the nearest multiple of 12.5%; this normally equates to a boost of ~0.25-1 points per assignments.
+**Grading:** We curve grades just a little! We round to the nearest multiple of 12.5%; this normally equates to a boost of ~0.25-1 points per assignments.
 
-There is a file called `assignments.json` which has the valid sections, but this is actually outdated. `assignments.json` is just used for the list of assignment names, which should match exactly in this program, Runestone, Canvas, and all gradebooks.
+**Assignment Files:** There is a file called `assignments.json` which has the valid sections, but this is actually outdated. `assignments.json` is just used for the list of assignment names, which should match exactly in this program, Runestone, Canvas, and all gradebooks.
+
+**Azure CWID Caching:** Following the first run, a file called `cwids.db` will be generated; this is a cache of student CWIDs -> emails. Leave this file alone; it will help the script run quicker. These files are gitignored, but ensure that you *never* commit a `cwids.db` or gradebook csv for legal reasons.
 
 ## Canvas to Runestone Student Script (deprecated)
 *This script should no longer be used, in favor of actual Canvas linking to Runestone via ITS. This is a backup for if things break*
