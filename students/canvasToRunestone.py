@@ -17,7 +17,7 @@ if os.path.exists('RunestoneStudents-master.csv'):
 
 with open(gradebook, "r") as gradebook: 
   # Ignore first two lines (irrelevant gradebook stuff)
-  for _ in range(0, 2): 
+  for _ in range(0, 3): 
     next(gradebook)
 
   # open (or create) master students file
