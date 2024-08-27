@@ -42,6 +42,11 @@ async def main() -> None:
     # TODO add max assignment pts to "loaded assignments"? or enter (to calculate percentage)
     max_points = int(input("Enter max score for this assignment: "))
 
+    curved_score_max = int(input("Enter whether this is a 4 or 5 assignment: "))
+    if curved_score_max != 4 and curved_score_max != 5:
+        print("Invalid score curve")
+        exit()
+
     # Find students from Runestone, formatted { first_last: score%}
     students: dict = {}
     for _, row in runestoneDF.iterrows():
@@ -61,21 +66,25 @@ async def main() -> None:
 
     # grade students
     file = open(f'{assignment_name}.csv', 'w')
-    with shelve.open('cwids.db') as cache:
+    with shelve.open('cwids') as cache:
         for student, grade in students.items():
             if not str(student).endswith("@mines.edu"):
                 continue
 
             # Rounded score: round to the nearest multiple of 12.5%
-            rounded_score = math.ceil(grade / 12.5) * 0.125 * 4
+            rounded_score = math.ceil(grade / 12.5) * 0.125 * curved_score_max
 
             file.write(f'{student},{rounded_score}\n')
 
             if student in cache.keys():
                 cwid = cache[student]
             else:
-                cwid = await azure.getCWIDFromEmail(student)
-                cache[student] = cwid
+                try:
+                    cwid = await azure.getCWIDFromEmail(student)
+                    cache[student] = cwid
+                except:
+                    print(f"Couldn't find CWID for student {student}..")
+                    pass
 
             condition = gradebookDF['SIS User ID'] == cwid
             gradebookDF.loc[condition, assignment_name] = rounded_score
