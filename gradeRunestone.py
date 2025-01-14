@@ -59,6 +59,7 @@ async def main() -> None:
         if assignment_name in key:
             assignment_name = key
             found_assignment = True
+            print("FOUND ASNGMNET", assignment_name)
 
     if not found_assignment:
         print(f"Could not find assignment '{assignment_name}' in the Canvas gradebook! Make sure you published the assignment and downloaded the latest gradebook.")
@@ -86,7 +87,7 @@ async def main() -> None:
                     print(f"Couldn't find CWID for student {student}..")
                     pass
 
-            condition = gradebookDF['SIS User ID'] == cwid
+            condition = gradebookDF['SIS User ID'] == float(cwid)
             gradebookDF.loc[condition, assignment_name] = rounded_score
 
     gradebookDF = gradebookDF.fillna(0)
