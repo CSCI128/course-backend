@@ -39,7 +39,6 @@ async def main() -> None:
             print("Could not find the specified assignment!")
             exit()
 
-    # TODO add max assignment pts to "loaded assignments"? or enter (to calculate percentage)
     max_points = int(input("Enter max score for this assignment: "))
 
     curved_score_max = int(input("Enter whether this is a 4 or 5 assignment: "))
@@ -59,7 +58,6 @@ async def main() -> None:
         if assignment_name in key:
             assignment_name = key
             found_assignment = True
-            print("FOUND ASNGMNET", assignment_name)
 
     if not found_assignment:
         print(f"Could not find assignment '{assignment_name}' in the Canvas gradebook! Make sure you published the assignment and downloaded the latest gradebook.")
@@ -91,7 +89,7 @@ async def main() -> None:
             gradebookDF.loc[condition, assignment_name] = rounded_score
 
     gradebookDF = gradebookDF.fillna(0)
-    gradebookDF.to_csv('Grades-CSCI128_-_Spring_2024_-_All Sections.csv', index=False)
+    gradebookDF.to_csv('Grades.csv', index=False)
 
     file.close()
 
